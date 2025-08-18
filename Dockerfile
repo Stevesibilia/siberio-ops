@@ -261,5 +261,12 @@ RUN echo "PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\
     echo "source <(velero completion bash)" >>/etc/profile && \
     echo "source <(pluto completion bash --no-footer)" >>/etc/profile
 
-# Set bash as default shell
-CMD [ "/bin/bash" ]
+ENV HISTFILE=/root/dotfiles/.bash_history
+RUN mkdir -p /root/dotfiles
+
+RUN mkdir /root/.kubes
+
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]

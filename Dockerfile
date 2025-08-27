@@ -262,9 +262,10 @@ RUN echo "PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\
     echo "source <(pluto completion bash --no-footer)" >>/etc/profile
 
 ENV HISTFILE=/root/dotfiles/.bash_history
-RUN mkdir -p /root/dotfiles
+RUN mkdir -p /root/dotfiles && mkdir /root/.kubes
 
-RUN mkdir /root/.kubes
+COPY scripts/scale-deployments.sh /usr/local/bin/scale-deployments.sh
+RUN chmod +x /usr/local/bin/scale-deployments.sh
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh

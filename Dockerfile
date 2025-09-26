@@ -48,16 +48,13 @@ ENV CURL_DEFAULT_FLAGS="--retry 3 --retry-delay 1 --retry-connrefused --max-time
 # Install kubectl
 # https://console.cloud.google.com/storage/browser/kubernetes-release/release
 ENV KUBECTL_STABLE_VERSION=1.32
-RUN set -eux; \
-    STABLE_VERSION=$(curl ${CURL_DEFAULT_FLAGS} -fsSL "https://dl.k8s.io/release/stable-${KUBECTL_STABLE_VERSION}.txt"); \
-    echo "Installing kubectl ${STABLE_VERSION}..."; \
-    curl ${CURL_DEFAULT_FLAGS} \
-    -fsSLo /usr/local/bin/kubectl "https://dl.k8s.io/release/${STABLE_VERSION}/bin/linux/${TARGETARCH}/kubectl"; \
-    curl ${CURL_DEFAULT_FLAGS} \
-    -fsSLo /tmp/kubectl.sha256 "https://dl.k8s.io/release/${STABLE_VERSION}/bin/linux/${TARGETARCH}/kubectl.sha256"; \
-    echo "$(cat /tmp/kubectl.sha256)  /usr/local/bin/kubectl" | sha256sum --check; \
-    chmod +x /usr/local/bin/kubectl; \
-    kubectl version --client; \
+RUN STABLE_VERSION=$(curl ${CURL_DEFAULT_FLAGS} -fsSL "https://dl.k8s.io/release/stable-${KUBECTL_STABLE_VERSION}.txt") && \
+    echo "Installing kubectl ${STABLE_VERSION}..." && \
+    curl ${CURL_DEFAULT_FLAGS} -fsSLo /usr/local/bin/kubectl "https://dl.k8s.io/release/${STABLE_VERSION}/bin/linux/${TARGETARCH}/kubectl" && \
+    curl ${CURL_DEFAULT_FLAGS} -fsSLo /tmp/kubectl.sha256 "https://dl.k8s.io/release/${STABLE_VERSION}/bin/linux/${TARGETARCH}/kubectl.sha256" && \
+    echo "$(< /tmp/kubectl.sha256)  /usr/local/bin/kubectl" | sha256sum --check && \
+    chmod +x /usr/local/bin/kubectl && \
+    kubectl version --client && \
     rm /tmp/kubectl.sha256
 
 # OpenTofu installation

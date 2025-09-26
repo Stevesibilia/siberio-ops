@@ -41,12 +41,24 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 COPY --from=gobinaries /go/bin/tfk8s /usr/local/bin/tfk8s
 RUN chmod +x /usr/local/bin/tfk8s
 
+# Centralized network tool flags
+ENV CURL_DEFAULT_FLAGS="--retry 3 --retry-delay 1 --retry-connrefused --max-time 20 --connect-timeout 15" \
+    WGET_DEFAULT_FLAGS="--retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3"
+
 # Install kubectl
 # https://console.cloud.google.com/storage/browser/kubernetes-release/release
-ENV KUBECTL_STABLE_VERSION=1.31
-RUN echo "Installing kubectl using the stable version of ${KUBECTL_STABLE_VERSION}..." && \
-    curl -so /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -L -s "https://storage.googleapis.com/kubernetes-release/release/stable-${KUBECTL_STABLE_VERSION}.txt")/bin/linux/${TARGETARCH}/kubectl && \
-    chmod +x /usr/local/bin/kubectl
+ENV KUBECTL_STABLE_VERSION=1.32
+RUN set -eux; \
+    STABLE_VERSION=$(curl ${CURL_DEFAULT_FLAGS} -fsSL "https://dl.k8s.io/release/stable-${KUBECTL_STABLE_VERSION}.txt"); \
+    echo "Installing kubectl ${STABLE_VERSION}..."; \
+    curl ${CURL_DEFAULT_FLAGS} \
+    -fsSLo /usr/local/bin/kubectl "https://dl.k8s.io/release/${STABLE_VERSION}/bin/linux/${TARGETARCH}/kubectl"; \
+    curl ${CURL_DEFAULT_FLAGS} \
+    -fsSLo /tmp/kubectl.sha256 "https://dl.k8s.io/release/${STABLE_VERSION}/bin/linux/${TARGETARCH}/kubectl.sha256"; \
+    echo "$(cat /tmp/kubectl.sha256)  /usr/local/bin/kubectl" | sha256sum --check; \
+    chmod +x /usr/local/bin/kubectl; \
+    kubectl version --client; \
+    rm /tmp/kubectl.sha256
 
 # OpenTofu installation
 # NOTE: When migrating from Terraform 1.8.x, please migrate to OpenTofu 1.8.2 first, then upgrade your OpenTofu installation to the latest version.

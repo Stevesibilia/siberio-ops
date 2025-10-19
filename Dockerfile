@@ -7,14 +7,6 @@ ARG ALPINE_VERSION=3.22
 # docker run --rm --entrypoint ash eu.gcr.io/google.com/cloudsdktool/google-cloud-cli:${CLOUD_SDK_VERSION} -c 'cat /etc/issue'
 # Check the available version here: https://github.com/sparkfabrik/docker-alpine-aws-cli/pkgs/container/docker-alpine-aws-cli
 
-# Build go binaries
-FROM golang:1.24-alpine AS gobinaries
-
-# https://github.com/jrhouston/tfk8s
-ENV TFK8S_VERSION=0.1.10
-RUN apk --no-cache add git && \
-    go install github.com/jrhouston/tfk8s@v${TFK8S_VERSION}
-
 FROM alpine:${ALPINE_VERSION}
 
 # Build target arch passed by BuildKit
@@ -36,10 +28,6 @@ RUN apk --no-cache add vim tmux curl wget less make bash \
     openssl git unzip mysql-client yq cosign openssh
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
-# Install tfk8s copying the binary from the gobinaries stage
-COPY --from=gobinaries /go/bin/tfk8s /usr/local/bin/tfk8s
-RUN chmod +x /usr/local/bin/tfk8s
 
 # Centralized network tool flags
 ENV CURL_DEFAULT_FLAGS="--retry 3 --retry-delay 1 --retry-connrefused --max-time 20 --connect-timeout 15" \

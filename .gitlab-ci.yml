@@ -3,7 +3,7 @@ stages:
 
 
 include:
-  - component: $CI_SERVER_FQDN/homelab/ci-cd/components/dockerbuild/docker-build@multiarch
+  - component: $CI_SERVER_FQDN/homelab/ci-cd/components/dockerbuild/docker-build@0.0.7
     inputs:
       dockerfile: "./Dockerfile"
       platform: "linux/amd64,linux/arm64"

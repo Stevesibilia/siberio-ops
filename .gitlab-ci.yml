@@ -6,4 +6,4 @@ include:
   - component: $CI_SERVER_FQDN/homelab/ci-cd/components/dockerbuild/docker-build@multiarch
     inputs:
       dockerfile: "./Dockerfile"
-      platform: 'linux/amd64'
+      platform: 'linux/amd64,linux/arm64'
